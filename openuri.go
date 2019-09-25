@@ -1,6 +1,7 @@
 package openuri
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 	"os"
@@ -17,7 +18,11 @@ type ClientOption func(*Client) error
 
 // New returns a Client struct
 func New(options ...ClientOption) (*Client, error) {
-	c := &Client{httpClient: http.DefaultClient}
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: transCfg}
+	c := &Client{httpClient: client}
 	for _, option := range options {
 		if err := option(c); err != nil {
 			return nil, err
